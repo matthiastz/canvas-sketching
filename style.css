@@ -1,0 +1,67 @@
+/*
+#paintContainer {
+    width: 600px;
+    height: 480px;
+    position: relative;
+}
+
+#bowContainer {
+    width: inherit;
+    height: inherit;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+img {
+    width: inherit;
+    height: inherit;
+}
+
+#bowContainer {
+    z-index: 10;
+}
+
+
+
+canvas {
+    width: 600px;
+    height: 480px;
+    border-style: solid;
+}
+
+
+
+
+#canvasDiv {
+    width: 640px;
+    height: 480px;
+    position: relative;
+}
+
+#canvas, #bowImg {
+    width: inherit;
+    height: inherit;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+}
+
+
+
+#bowImg {
+
+    z-index: -1;
+}
+
+*/
+
+#canvas {
+    border-style: solid;
+}
+
+
+
+
+
