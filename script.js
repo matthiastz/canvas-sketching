@@ -1,27 +1,33 @@
-
 var context;
-
 var clickColorList;
-
 var clickSizeList;
-
 var canvasDiv;
-
-
-var curSize = 5;
+var clickXPainted;
+var paint;
+var clickX;
+var clickY;
+var clickDrag;
+var xOld;
+var yOld;
+var eventList;
 
 // init. process (called at start)
 $(document).ready(function(){
 
+    eventList = new Array();
+    xOld = -1;
+    yOld = -1;
+
     paint = false;
     clickX = new Array();
+    clickXPainted = new Array();
     clickY = new Array();
     clickDrag = new Array();
     clickColorList = new Array();
     clickSizeList = new Array();
 
     // drawingColor = document.getElementById("colorpicker").value;
-    clickColorList.push(document.getElementById("colorpicker").value);
+    //clickColorList.push(document.getElementById("colorpicker").value);
 
     // NEW canvas init.
     canvasDiv = document.getElementById("canvasDiv");
@@ -35,208 +41,109 @@ $(document).ready(function(){
     //}
 
     context = document.getElementById("canvas").getContext("2d");
-    context.lineWidth = 5;
-});
+    context.lineJoin = "round";
 
+    context.shadowBlur = 0.1;
+    context.shadowColor = document.getElementById("colorpicker").value;
 
-$("#canvas").mousedown(function(e) {
+    // TODO; use value from HTML element
+    context.lineWidth = document.getElementById("sizeRange").value;
+    context.strokeStyle = document.getElementById("colorpicker").value;
+    context.fillStyle = $("#colorpicker").value;
 
-    //var mouseX = e.pageX - this.offsetLeft;
-    //var mouseY = e.pageY - this.offsetTop;
-
-    var mouseX = e.pageX - this.offsetLeft;
-    var mouseY = e.pageY - this.offsetTop;
-
-    paint = true;
-    addClick(mouseX, mouseY);
-    redraw();
-});
-
-
-
-// TODO: add menu color, paint stroke size
-/*
-$("#smaller").click(function () {
-    curSize--;
-    clickSizeList.push(curSize);
-    //context.lineWidth--;
-});
-
-$("#bigger").click(function () {
-    curSize++;
-    clickSizeList.push(curSize);
-});
-*/
-
-$("#canvas").mousemove(function(e) {
-
-    // if already was painted (mouse clicked + hold) then continue drawing
-    if(paint) {
-
-        // TODO: write method to calculate actual mouse pos
-        addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-        redraw();
-
-    }
+    document.getElementById("canvas").style.cursor = "crosshair";
 
 });
 
-// TODO: calculate pos correct
-
-// TODO: init + update color correct
-
-$("#canvas").mouseup(function(e) {
-    paint = false;
-});
-
-$('#canvas').mouseleave(function(e){
-    paint = false;
-});
-
-function addClick(x, y, dragging) {
-
-    // push the elements to the arrays
-    clickX.push(x);
-    clickY.push(y);
-    clickDrag.push(dragging);
-
-    // push the current size
-    //clickSizeList.push(curSize);
-    clickSizeList.push(document.getElementById("sizeRange").value);
-
-
-    clickColorList.push(document.getElementById("colorpicker").value);
-}
-
-var clickX = new Array();
-var clickY = new Array();
-var clickDrag = new Array();
-var paint;
-
+// TODO: radiergummi -> weiße farbe
+// TODO: schleife rahmen -> z index
+// TODO: other impl. for click than for move
+// TODO: hint for line size (circle would be good)
+// TODO: pick color from painted area (already painted colors reusable)
+// TODO: feature of undoing / redoing action
+// TODO: make it possible to activate/deactivate silhouette
+// TODO: use multiple silhouettes
+// TODO: feature SCREEN DUMP -> png canvas -> ..
 
 // clear the whole canvas AND delete all painted elements (dots)
 document.getElementById("clearCanvas").onclick = function () {
-    clearWholeCanvas();
+    clearWholeCanvas(context);
     clickX = new Array();
+    clickXPainted = new Array();
     clickY = new Array();
     clickDrag = new Array();
+    updateStrokeSize(document.getElementById("colorpicker").value);
 };
 
-function clearWholeCanvas() {
+function clearWholeCanvas(context) {
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+    // updateStrokeSize(document.getElementById("colorpicker").value);
 }
 
-// TODO: radiergummi -> weiße farbe
+document.getElementById("canvas").onmousedown = function (e) {
 
-// schleife rahmen -> z index
+    updateStrokeSize($("#sizeRange").value);
 
-function redraw() {
-    // TODO: more efficient implementation (clear whole canvas, redraw everything)
+    paint = true;
 
-    // Clears the canvas
-    //clearWholeCanvas();
-  
+    var mouseX = e.pageX - this.offsetLeft;
+    var mouseY = e.pageY - this.offsetTop;
+    context.moveTo(mouseX, mouseY);
+    context.beginPath();
 
-  context.lineJoin = "round";
-  //context.lineWidth = 10;
+};
 
-  // TODO: source of problem -> everything gets repainted -> every stroke width is now overwritten
-  for(var i=0; i < clickX.length; i++) {
-      context.beginPath();
-      if(clickDrag[i] && i){
-        context.moveTo(clickX[i-1], clickY[i-1]);   // move painter to pos ....
-      } else {
-        context.moveTo(clickX[i]-1, clickY[i]);
-      }
-      context.lineTo(clickX[i], clickY[i]);     // draw a line to x / y
-      context.closePath();
-      context.strokeStyle = clickColorList[i];
-      //context.lineWidth = radius;
+function drawCircle(x, y, radius) {
+    context.fillStyle = document.getElementById("colorpicker").value;
+    context.beginPath();
+    //setDrawingColorFromColorPicker($("#colorpicker").value);
 
-      context.lineWidth = clickSizeList[i];
-      //context.strokeStyle = drawingColor;
-      context.stroke();
-  }
+    context.arc(x, y, radius, 0, 2 * Math.PI, true);
 
+    context.fill();
+    context.closePath();
 }
 
-
-
-// retrieve the selected color from the color picker
-function setDrawingColorFromColorPicker(color) {
-    //drawingColor = color;
-    clickColorList.push(color);
-}
-
-/*
-
-var context;
-var canvas;
-
-$(document).ready(function(){
-
-
-    context = document.getElementById("canvas").getContext("2d");
-});
-
-$("#canvas").mousedown(function(e){
+document.getElementById("canvas").onmousemove = function (e) {
 
     var mouseX = e.pageX - this.offsetLeft;
     var mouseY = e.pageY - this.offsetTop;
 
-    paint = true;
-    addClick(mouseX, mouseY);
-    redraw();
-});
-
-$("#canvas").mousemove(function(e){
-    if(paint){
-        addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-        redraw();
-    }
-});
-
-$("#canvas").mouseup(function(e){
-    paint = false;
-});
-
-$("#canvas").mouseleave(function(e){
-    paint = false;
-});
-
-var clickX = new Array();
-var clickY = new Array();
-var clickDrag = new Array();
-var paint;
-
-function addClick(x, y, dragging)
-{
-    clickX.push(x);
-    clickY.push(y);
-    clickDrag.push(dragging);
-}
-
-function redraw(){
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
-
-    context.strokeStyle = "#df4b26";
-    context.lineJoin = "round";
-    context.lineWidth = 5;
-
-    for(var i=0; i < clickX.length; i++) {
-        context.beginPath();
-        if(clickDrag[i] && i){
-            context.moveTo(clickX[i-1], clickY[i-1]);
-        }else{
-            context.moveTo(clickX[i]-1, clickY[i]);
-        }
-        context.lineTo(clickX[i], clickY[i]);
+    if (paint) {
+        context.lineTo(mouseX, mouseY);
+        // needed! else the lines look like shit
         context.closePath();
         context.stroke();
+        context.moveTo(mouseX, mouseY);
     }
+
+};
+
+document.getElementById("canvas").onmouseup = function (e) {
+    paint = false;
+
+    // paint the dot on mouseup event -> mousedown had to be called before
+    var mouseX = e.pageX - this.offsetLeft;
+    var mouseY = e.pageY - this.offsetTop;
+    drawCircle(mouseX, mouseY, context.lineWidth / 2);
+};
+
+
+document.getElementById("canvas").onmouseout = function (e) {
+    paint = false;
+};
+
+function updateStrokeSize(value) {
+    //curSize = value;
+    context.lineWidth = value;
+    context.lineJoin = "round";
 }
 
-*/
+document.getElementById("clearCanvas").onclick = function () {
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+};
 
-
-
+function setDrawingColorFromColorPicker(color) {
+    context.strokeStyle = color;
+    context.shadowColor = color;
+}

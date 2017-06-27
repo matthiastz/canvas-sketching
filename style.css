@@ -1,65 +1,41 @@
-/*
-#paintContainer {
-    width: 600px;
-    height: 480px;
-    position: relative;
-}
-
-#bowContainer {
-    width: inherit;
-    height: inherit;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-img {
-    width: inherit;
-    height: inherit;
-}
-
-#bowContainer {
-    z-index: 10;
-}
-
-
-
-canvas {
-    width: 600px;
-    height: 480px;
-    border-style: solid;
-}
-
-
-
-
 #canvasDiv {
-    width: 640px;
-    height: 480px;
     position: relative;
 }
-
-#canvas, #bowImg {
-    width: inherit;
-    height: inherit;
-    position: absolute;
-    top: 0;
-    left: 0;
-
-}
-
-
 
 #bowImg {
-
-    z-index: -1;
+    width: 640px;
+    height: auto;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 1;
+    position: absolute;
 }
 
-*/
+
+#border {
+    width: 640px;
+    height: 480px;
+    z-index: 2;
+    position: absolute;
+    pointer-events: none;
+    border: 3px black solid;
+}
 
 #canvas {
-    border-style: solid;
+    position: fixed;
 }
+
+/* don't let the user select/mark anything  */
+body {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+
 
 
 
